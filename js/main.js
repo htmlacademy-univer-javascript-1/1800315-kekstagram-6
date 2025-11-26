@@ -1,5 +1,6 @@
 import { generatePhotos } from './photo-generator.js';
 import { renderThumbnails } from './thumbnails.js';
+import './form.js';
 
 const photos = generatePhotos();
 export { photos };
