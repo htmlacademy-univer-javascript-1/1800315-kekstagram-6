@@ -67,16 +67,56 @@ const createCommentElement = (comment) => {
   return commentElement;
 };
 
-const renderComments = (comments, socialCommentsElement) => {
-  socialCommentsElement.innerHTML = '';
+const COMMENTS_PER_PAGE = 5;
+let currentComments = [];
+let displayedCommentsCount = 0;
+
+const renderComments = (comments, socialCommentsElement, startIndex = 0) => {
+  const endIndex = Math.min(startIndex + COMMENTS_PER_PAGE, comments.length);
   const fragment = document.createDocumentFragment();
 
-  comments.forEach((comment) => {
-    const commentElement = createCommentElement(comment);
+  for (let i = startIndex; i < endIndex; i++) {
+    const commentElement = createCommentElement(comments[i]);
     fragment.appendChild(commentElement);
-  });
+  }
 
   socialCommentsElement.appendChild(fragment);
+  displayedCommentsCount = endIndex;
+
+  return endIndex;
+};
+
+const updateCommentsCounter = (currentElements, totalCount, displayedCount) => {
+  const commentsCountSpan = currentElements.socialCommentCount.querySelector('.comments-count');
+  if (commentsCountSpan) {
+    commentsCountSpan.textContent = totalCount;
+  }
+
+  const commentCountText = currentElements.socialCommentCount;
+  if (commentCountText) {
+    const textNodes = Array.from(commentCountText.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE);
+    if (textNodes.length > 0 && textNodes[0]) {
+      textNodes[0].textContent = `${displayedCount} из `;
+    }
+  }
+};
+
+const toggleCommentsLoader = (currentElements, hasMoreComments) => {
+  if (hasMoreComments) {
+    currentElements.commentsLoader.classList.remove('hidden');
+  } else {
+    currentElements.commentsLoader.classList.add('hidden');
+  }
+};
+
+const onCommentsLoaderClick = (currentElements) => {
+  const remainingComments = currentComments.length - displayedCommentsCount;
+  if (remainingComments > 0) {
+    const nextIndex = displayedCommentsCount;
+    renderComments(currentComments, currentElements.socialComments, nextIndex);
+    updateCommentsCounter(currentElements, currentComments.length, displayedCommentsCount);
+    toggleCommentsLoader(currentElements, displayedCommentsCount < currentComments.length);
+  }
 };
 
 const openFullscreen = (photo) => {
@@ -91,10 +131,21 @@ const openFullscreen = (photo) => {
   currentElements.commentsCount.textContent = photo.comments.length;
   currentElements.socialCaption.textContent = photo.description;
 
-  renderComments(photo.comments, currentElements.socialComments);
+  currentComments = photo.comments;
+  displayedCommentsCount = 0;
+  currentElements.socialComments.innerHTML = '';
 
-  currentElements.socialCommentCount.classList.add('hidden');
-  currentElements.commentsLoader.classList.add('hidden');
+  renderComments(currentComments, currentElements.socialComments, 0);
+  updateCommentsCounter(currentElements, currentComments.length, displayedCommentsCount);
+
+  currentElements.socialCommentCount.classList.remove('hidden');
+  toggleCommentsLoader(currentElements, displayedCommentsCount < currentComments.length);
+
+  const oldLoaderButton = currentElements.commentsLoader;
+  const newLoaderButton = oldLoaderButton.cloneNode(true);
+  oldLoaderButton.replaceWith(newLoaderButton);
+  currentElements.commentsLoader = newLoaderButton;
+  newLoaderButton.addEventListener('click', () => onCommentsLoaderClick(currentElements));
 
   currentElements.element.classList.remove('hidden');
   document.body.classList.add('modal-open');
