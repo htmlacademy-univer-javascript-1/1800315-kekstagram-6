@@ -130,6 +130,10 @@ const onUploadFormSubmit = (evt) => {
 
 const onFormDocumentKeyDown = (evt) => {
   if (evt.key === 'Escape' && elements && elements.overlay && !elements.overlay.classList.contains('hidden')) {
+    const activeElement = document.activeElement;
+    if (activeElement === elements.hashtagsInput || activeElement === elements.descriptionTextarea) {
+      return;
+    }
     evt.preventDefault();
     closeUploadForm();
   }
@@ -145,8 +149,12 @@ const initForm = () => {
   elements.cancelButton.addEventListener('click', onUploadCancelClick);
   document.addEventListener('keydown', onFormDocumentKeyDown);
 
-  if (typeof Pristine !== 'undefined') {
+  // Загружаем Pristine асинхронно, чтобы не блокировать остальной код
+  setTimeout(async () => {
     try {
+      const PristineModule = await import('./pristine.js');
+      const Pristine = PristineModule.default;
+
       pristine = new Pristine(elements.form, {
         classTo: 'img-upload__field-wrapper',
         errorTextParent: 'img-upload__field-wrapper',
@@ -158,8 +166,9 @@ const initForm = () => {
 
       elements.form.addEventListener('submit', onUploadFormSubmit);
     } catch (error) {
+      // Игнорируем ошибки инициализации валидации, но форма все равно должна работать
     }
-  }
+  }, 0);
 };
 
 if (document.readyState === 'loading') {
