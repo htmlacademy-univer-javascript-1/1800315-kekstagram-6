@@ -233,10 +233,13 @@
     <div class="img-upload__message  img-upload__message--loading">Загружаем...</div>
   </template>
 
-  <script src="vendor/pristine/utils.js" type="module"></script>
-  <script src="vendor/pristine/lang.js" type="module"></script>
-  <script src="vendor/pristine/pristine.js" type="module"></script>
   <script src="vendor/nouislider/nouislider.min.js"></script>
+  <script type="module">
+    import './vendor/pristine/utils.js';
+    import './vendor/pristine/lang.js';
+    import Pristine from './vendor/pristine/pristine.js';
+    window.Pristine = Pristine;
+  </script>
   <script src="./js/main.js" type="module"></script>
   <script src="./js/functions.js"></script>
 

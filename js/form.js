@@ -354,7 +354,15 @@ const initForm = () => {
       }
     } else {
       // Повторяем попытку через небольшую задержку, если модуль еще не загружен
-      setTimeout(initPristine, 50);
+      // Максимум 20 попыток (1 секунда)
+      if (initPristine.attempts === undefined) {
+        initPristine.attempts = 0;
+      }
+      if (initPristine.attempts < 20) {
+        initPristine.attempts++;
+        setTimeout(initPristine, 50);
+      }
+      // Если Pristine не загрузился, форма все равно должна работать без валидации
     }
   };
   initPristine();
