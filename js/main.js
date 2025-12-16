@@ -15,8 +15,4 @@ if (document.readyState === 'loading') {
 }
 
 // Загружаем форму после инициализации основного приложения
-setTimeout(() => {
-  import('./form.js').catch(() => {
-    // Игнорируем ошибки загрузки формы
-  });
-}, 0);
+import './form.js';
