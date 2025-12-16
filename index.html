@@ -235,10 +235,12 @@
 
   <script src="vendor/nouislider/nouislider.min.js"></script>
   <script type="module">
-    import './vendor/pristine/utils.js';
-    import './vendor/pristine/lang.js';
-    import Pristine from './vendor/pristine/pristine.js';
-    window.Pristine = Pristine;
+    // Загружаем зависимости Pristine последовательно
+    import('./vendor/pristine/utils.js');
+    import('./vendor/pristine/lang.js');
+    import('./vendor/pristine/pristine.js').then((module) => {
+      window.Pristine = module.default;
+    });
   </script>
   <script src="./js/main.js" type="module"></script>
   <script src="./js/functions.js"></script>
