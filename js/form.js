@@ -1,3 +1,5 @@
+import { sendData } from './api.js';
+
 const getFormElements = () => {
   const uploadForm = document.querySelector('#upload-select-image');
   if (!uploadForm) {
@@ -18,7 +20,8 @@ const getFormElements = () => {
     effectLevelSlider: uploadForm.querySelector('.effect-level__slider'),
     effectLevelValue: uploadForm.querySelector('.effect-level__value'),
     effectLevelContainer: uploadForm.querySelector('.img-upload__effect-level'),
-    effectRadios: uploadForm.querySelectorAll('.effects__radio')
+    effectRadios: uploadForm.querySelectorAll('.effects__radio'),
+    submitButton: uploadForm.querySelector('#upload-submit')
   };
 };
 
@@ -247,6 +250,30 @@ const initEffectSlider = () => {
   updateEffectSlider('none');
 };
 
+const resetForm = () => {
+  if (!elements) {
+    return;
+  }
+  resetScale();
+  if (effectSlider) {
+    effectSlider.destroy();
+    effectSlider = null;
+  }
+  if (elements.previewImage) {
+    elements.previewImage.style.filter = '';
+  }
+  const noneRadio = elements.form.querySelector('#effect-none');
+  if (noneRadio) {
+    noneRadio.checked = true;
+    updateEffectSlider('none');
+  }
+  elements.form.reset();
+  elements.fileInput.value = '';
+  if (pristine) {
+    pristine.reset();
+  }
+};
+
 const openUploadForm = () => {
   if (!elements) {
     return;
@@ -263,19 +290,7 @@ const closeUploadForm = () => {
   }
   elements.overlay.classList.add('hidden');
   document.body.classList.remove('modal-open');
-  elements.form.reset();
-  elements.fileInput.value = '';
-  resetScale();
-  if (effectSlider) {
-    effectSlider.destroy();
-    effectSlider = null;
-  }
-  if (elements.previewImage) {
-    elements.previewImage.style.filter = '';
-  }
-  if (pristine) {
-    pristine.reset();
-  }
+  resetForm();
 };
 
 const onUploadFileChange = () => {
@@ -289,12 +304,112 @@ const onUploadCancelClick = () => {
   closeUploadForm();
 };
 
-const onUploadFormSubmit = (evt) => {
+const showSuccessMessage = () => {
+  const successTemplate = document.querySelector('#success');
+  if (!successTemplate) {
+    return;
+  }
+  const successElement = successTemplate.content.cloneNode(true);
+  const successSection = successElement.querySelector('.success');
+  document.body.appendChild(successSection);
+
+  function closeSuccess() {
+    successSection.remove();
+    document.removeEventListener('keydown', onSuccessKeyDown);
+    document.removeEventListener('click', onSuccessClick);
+  }
+
+  function onSuccessKeyDown(evt) {
+    if (evt.key === 'Escape') {
+      closeSuccess();
+    }
+  }
+
+  function onSuccessClick(evt) {
+    if (evt.target === successSection) {
+      closeSuccess();
+    }
+  }
+
+  const successButton = successSection.querySelector('.success__button');
+  if (successButton) {
+    successButton.addEventListener('click', closeSuccess);
+  }
+
+  document.addEventListener('keydown', onSuccessKeyDown);
+  document.addEventListener('click', onSuccessClick);
+};
+
+const showErrorMessage = () => {
+  const errorTemplate = document.querySelector('#error');
+  if (!errorTemplate) {
+    return;
+  }
+  const errorElement = errorTemplate.content.cloneNode(true);
+  const errorSection = errorElement.querySelector('.error');
+  document.body.appendChild(errorSection);
+
+  function closeError() {
+    errorSection.remove();
+    document.removeEventListener('keydown', onErrorKeyDown);
+    document.removeEventListener('click', onErrorClick);
+  }
+
+  function onErrorKeyDown(evt) {
+    if (evt.key === 'Escape') {
+      closeError();
+    }
+  }
+
+  function onErrorClick(evt) {
+    if (evt.target === errorSection) {
+      closeError();
+    }
+  }
+
+  const errorButton = errorSection.querySelector('.error__button');
+  if (errorButton) {
+    errorButton.addEventListener('click', closeError);
+  }
+
+  document.addEventListener('keydown', onErrorKeyDown);
+  document.addEventListener('click', onErrorClick);
+};
+
+const blockSubmitButton = (isBlocked) => {
+  if (!elements || !elements.submitButton) {
+    return;
+  }
+  elements.submitButton.disabled = isBlocked;
+  if (isBlocked) {
+    elements.submitButton.textContent = 'Отправляю...';
+  } else {
+    elements.submitButton.textContent = 'Опубликовать';
+  }
+};
+
+const onUploadFormSubmit = async (evt) => {
+  evt.preventDefault();
+
   if (pristine) {
     const isValid = pristine.validate();
     if (!isValid) {
-      evt.preventDefault();
+      return;
     }
+  }
+
+  const formData = new FormData(elements.form);
+  blockSubmitButton(true);
+
+  try {
+    await sendData(formData);
+    closeUploadForm();
+    resetForm();
+    showSuccessMessage();
+  } catch (error) {
+    showErrorMessage();
+  } finally {
+    blockSubmitButton(false);
   }
 };
 

@@ -2,3 +2,4 @@ webpack.config.js
 js/pristine.js
 js/lang.js
 js/utils.js
+js/nouislider.min.js
