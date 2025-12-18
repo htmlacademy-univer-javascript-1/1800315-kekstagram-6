@@ -31,7 +31,7 @@
       <section class="img-upload">
         <div class="img-upload__wrapper">
           <h2 class="img-upload__title  visually-hidden">Загрузка фотографии</h2>
-          <form class="img-upload__form" id="upload-select-image" method="post" enctype="multipart/form-data" action="https://29.javascript.htmlacademy.pro/kekstagram" autocomplete="off">
+          <form class="img-upload__form" id="upload-select-image" method="post" enctype="multipart/form-data" action="https://27.javascript.pages.academy/kekstagram" autocomplete="off">
 
             <!-- Изначальное состояние поля для загрузки изображения -->
             <fieldset class="img-upload__start">
@@ -234,13 +234,16 @@
   </template>
 
   <script src="./vendor/nouislider/nouislider.min.js"></script>
-  <script type="module">
+  <script src="./vendor/pristine/utils.js" type="module"></script>
+  <script src="./vendor/pristine/lang.js" type="module"></script>
+  <script src="./vendor/pristine/pristine.js" type="module"></script>
+  <!-- <script type="module">
     // Загружаем зависимости Pristine последовательно
     import('./vendor/pristine/utils.js');
     import('./vendor/pristine/lang.js');
     import('./vendor/pristine/pristine.js').then((module) => {
       window.Pristine = module.default;
-    });
+    }); -->
   </script>
   <script src="./js/main.js" type="module"></script>
   <script src="./js/functions.js" type="module"></script>
