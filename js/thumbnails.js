@@ -36,6 +36,10 @@ const renderThumbnails = (photos) => {
     return;
   }
 
+  // Очищаем предыдущие изображения
+  const existingPictures = picturesContainer.querySelectorAll('.picture');
+  existingPictures.forEach((picture) => picture.remove());
+
   const fragment = document.createDocumentFragment();
 
   photos.forEach((photo) => {
