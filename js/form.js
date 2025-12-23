@@ -32,7 +32,7 @@ const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
 let effectSlider = null;
-let defaultImageUrl = 'img/upload-default-image.jpg';
+const defaultImageUrl = 'img/upload-default-image.jpg';
 let currentImageUrl = null;
 
 const EFFECT_SETTINGS = {
