@@ -1,5 +1,6 @@
 import { getData } from './api.js';
 import { renderThumbnails } from './thumbnails.js';
+import { initFilters } from './filters.js';
 
 const showErrorMessage = (message) => {
   const errorContainer = document.createElement('div');
@@ -16,6 +17,15 @@ const initApp = async () => {
   try {
     const photos = await getData();
     renderThumbnails(photos);
+    
+    // Показываем блок фильтров после загрузки изображений
+    const filtersBlock = document.querySelector('.img-filters');
+    if (filtersBlock) {
+      filtersBlock.classList.remove('img-filters--inactive');
+    }
+    
+    // Инициализируем фильтры
+    initFilters(photos);
   } catch (error) {
     showErrorMessage(`Ошибка загрузки данных: ${error.message}`);
   }
