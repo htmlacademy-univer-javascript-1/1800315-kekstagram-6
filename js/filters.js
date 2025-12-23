@@ -25,9 +25,7 @@ const getRandomPhotos = (photos, count = 10) => {
 };
 
 // Функция для получения обсуждаемых фотографий (по убыванию комментариев)
-const getDiscussedPhotos = (photos) => {
-  return [...photos].sort((a, b) => b.comments.length - a.comments.length);
-};
+const getDiscussedPhotos = (photos) => [...photos].sort((a, b) => b.comments.length - a.comments.length);
 
 // Функция применения фильтра
 const applyFilter = (filterType) => {
@@ -65,12 +63,12 @@ const initFilters = (photos) => {
   // Обработчик клика на кнопки фильтров
   const handleFilterClick = (evt) => {
     const clickedButton = evt.target;
-    
+
     // Убираем активный класс у всех кнопок
     filterButtons.forEach((button) => {
       button.classList.remove('img-filters__button--active');
     });
-    
+
     // Добавляем активный класс к нажатой кнопке
     clickedButton.classList.add('img-filters__button--active');
 

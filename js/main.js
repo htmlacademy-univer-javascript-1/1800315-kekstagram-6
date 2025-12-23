@@ -17,13 +17,13 @@ const initApp = async () => {
   try {
     const photos = await getData();
     renderThumbnails(photos);
-    
+
     // Показываем блок фильтров после загрузки изображений
     const filtersBlock = document.querySelector('.img-filters');
     if (filtersBlock) {
       filtersBlock.classList.remove('img-filters--inactive');
     }
-    
+
     // Инициализируем фильтры
     initFilters(photos);
   } catch (error) {
