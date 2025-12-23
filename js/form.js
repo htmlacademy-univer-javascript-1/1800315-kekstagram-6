@@ -32,6 +32,8 @@ const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
 let effectSlider = null;
+const defaultImageUrl = 'img/upload-default-image.jpg';
+let currentImageUrl = null;
 
 const EFFECT_SETTINGS = {
   none: {
@@ -261,6 +263,12 @@ const resetForm = () => {
   }
   if (elements.previewImage) {
     elements.previewImage.style.filter = '';
+    // Восстанавливаем дефолтное изображение
+    if (currentImageUrl && currentImageUrl !== defaultImageUrl) {
+      URL.revokeObjectURL(currentImageUrl);
+      currentImageUrl = null;
+    }
+    elements.previewImage.src = defaultImageUrl;
   }
   const noneRadio = elements.form.querySelector('#effect-none');
   if (noneRadio) {
@@ -295,9 +303,29 @@ const closeUploadForm = () => {
 
 const onUploadFileChange = () => {
   const file = elements.fileInput.files[0];
-  if (file) {
-    openUploadForm();
+  if (!file) {
+    return;
   }
+
+  // Проверяем, что файл является изображением
+  if (!file.type.startsWith('image/')) {
+    return;
+  }
+
+  // Освобождаем предыдущий URL, если он был создан через createObjectURL
+  if (currentImageUrl && currentImageUrl !== defaultImageUrl) {
+    URL.revokeObjectURL(currentImageUrl);
+  }
+
+  // Создаем URL для загруженного изображения
+  currentImageUrl = URL.createObjectURL(file);
+
+  // Устанавливаем изображение в превью
+  if (elements.previewImage) {
+    elements.previewImage.src = currentImageUrl;
+  }
+
+  openUploadForm();
 };
 
 const onUploadCancelClick = () => {
