@@ -1,4 +1,5 @@
 import { sendData } from './api.js';
+import { isEscapeKey } from './utils.js';
 
 const getFormElements = () => {
   const uploadForm = document.querySelector('#upload-select-image');
@@ -25,16 +26,10 @@ const getFormElements = () => {
   };
 };
 
-let elements = null;
-let pristine = null;
-let scale = 100;
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
-let effectSlider = null;
 const defaultImageUrl = 'img/upload-default-image.jpg';
-let currentImageUrl = null;
-
 const EFFECT_SETTINGS = {
   none: {
     min: 0,
@@ -77,6 +72,12 @@ const EFFECT_SETTINGS = {
 const MAX_HASHTAGS = 5;
 const MAX_DESCRIPTION_LENGTH = 140;
 const HASHTAG_PATTERN = /^#[a-zа-яё0-9]{1,19}$/i;
+
+let elements = null;
+let pristine = null;
+let scale = 100;
+let effectSlider = null;
+let currentImageUrl = null;
 
 const validateHashtags = (value) => {
   if (!value.trim()) {
@@ -122,8 +123,8 @@ const getHashtagsErrorMessage = (value) => {
       if (hashtag.length === 1) {
         return 'Хэш-тег не может состоять только из одной решётки';
       }
-      if (hashtag.length > 20) {
-        return 'Максимальная длина хэш-тега 20 символов, включая решётку';
+      if (hashtag.length > MAX_HASHTAG_LENGTH) {
+        return `Максимальная длина хэш-тега ${MAX_HASHTAG_LENGTH} символов, включая решётку`;
       }
       if (hashtag.includes(' ')) {
         return 'Хэш-теги разделяются пробелами';
@@ -182,11 +183,7 @@ const applyEffect = (effectName, value) => {
   }
 
   const filterValue = effect.filter(value);
-  if (filterValue) {
-    elements.previewImage.style.filter = filterValue;
-  } else {
-    elements.previewImage.style.filter = '';
-  }
+  elements.previewImage.style.filter = filterValue ? filterValue : '';
 };
 
 const updateEffectSlider = (effectName) => {
@@ -348,7 +345,7 @@ const showSuccessMessage = () => {
   }
 
   function onSuccessKeyDown(evt) {
-    if (evt.key === 'Escape') {
+    if (isEscapeKey(evt)) {
       closeSuccess();
     }
   }
@@ -361,7 +358,8 @@ const showSuccessMessage = () => {
 
   const successButton = successSection.querySelector('.success__button');
   if (successButton) {
-    successButton.addEventListener('click', closeSuccess);
+    const successButtonClickHandler = () => closeSuccess();
+    successButton.addEventListener('click', successButtonClickHandler);
   }
 
   document.addEventListener('keydown', onSuccessKeyDown);
@@ -384,7 +382,7 @@ const showErrorMessage = () => {
   }
 
   function onErrorKeyDown(evt) {
-    if (evt.key === 'Escape') {
+    if (isEscapeKey(evt)) {
       closeError();
     }
   }
@@ -397,7 +395,8 @@ const showErrorMessage = () => {
 
   const errorButton = errorSection.querySelector('.error__button');
   if (errorButton) {
-    errorButton.addEventListener('click', closeError);
+    const errorButtonClickHandler = () => closeError();
+    errorButton.addEventListener('click', errorButtonClickHandler);
   }
 
   document.addEventListener('keydown', onErrorKeyDown);
@@ -442,7 +441,7 @@ const onUploadFormSubmit = async (evt) => {
 };
 
 const onFormDocumentKeyDown = (evt) => {
-  if (evt.key === 'Escape' && elements && elements.overlay && !elements.overlay.classList.contains('hidden')) {
+  if (isEscapeKey(evt) && elements && elements.overlay && !elements.overlay.classList.contains('hidden')) {
     const activeElement = document.activeElement;
     if (activeElement === elements.hashtagsInput || activeElement === elements.descriptionTextarea) {
       return;
@@ -478,44 +477,19 @@ const initForm = () => {
   resetScale();
   initEffectSlider();
 
-  // Инициализация Pristine (ждем загрузки модуля)
-  const initPristine = () => {
-    if (typeof window.Pristine !== 'undefined') {
-      try {
-        pristine = new window.Pristine(elements.form, {
-          classTo: 'img-upload__field-wrapper',
-          errorTextParent: 'img-upload__field-wrapper',
-          errorTextClass: 'img-upload__error-text'
-        });
+  pristine = new window.Pristine(elements.form, {
+    classTo: 'img-upload__field-wrapper',
+    errorTextParent: 'img-upload__field-wrapper',
+    errorTextClass: 'img-upload__error-text'
+  });
 
-        pristine.addValidator(elements.hashtagsInput, validateHashtags, getHashtagsErrorMessage);
-        pristine.addValidator(elements.descriptionTextarea, validateDescription, getDescriptionErrorMessage);
+  pristine.addValidator(elements.hashtagsInput, validateHashtags, getHashtagsErrorMessage);
+  pristine.addValidator(elements.descriptionTextarea, validateDescription, getDescriptionErrorMessage);
 
-        elements.form.addEventListener('submit', onUploadFormSubmit);
-      } catch (error) {
-        // Игнорируем ошибки инициализации валидации, но форма все равно должна работать
-      }
-    } else {
-      // Повторяем попытку через небольшую задержку, если модуль еще не загружен
-      // Максимум 20 попыток (1 секунда)
-      if (initPristine.attempts === undefined) {
-        initPristine.attempts = 0;
-      }
-      if (initPristine.attempts < 20) {
-        initPristine.attempts++;
-        setTimeout(initPristine, 50);
-      }
-      // Если Pristine не загрузился, форма все равно должна работать без валидации
-    }
-  };
-  initPristine();
+  elements.form.addEventListener('submit', onUploadFormSubmit);
 };
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initForm);
-} else {
-  initForm();
-}
+initForm();
 
 export { closeUploadForm };
 

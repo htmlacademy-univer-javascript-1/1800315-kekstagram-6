@@ -42,3 +42,5 @@ export const mergeConfig = (target, source) => {
   return result;
 };
 
+export const isEscapeKey = (evt) => evt.key === 'Escape';
+

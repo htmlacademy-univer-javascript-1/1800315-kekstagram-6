@@ -16,6 +16,8 @@ const FilterType = {
   DISCUSSED: 'discussed'
 };
 
+const DEBOUNCE_DELAY = 500;
+
 let allPhotos = [];
 
 // Функция для получения случайных неповторяющихся фотографий
@@ -49,7 +51,7 @@ const applyFilter = (filterType) => {
 };
 
 // Debounced версия функции применения фильтра
-const debouncedApplyFilter = debounce(applyFilter, 500);
+const debouncedApplyFilter = debounce(applyFilter, DEBOUNCE_DELAY);
 
 // Инициализация фильтров
 const initFilters = (photos) => {
@@ -61,7 +63,7 @@ const initFilters = (photos) => {
   const filterDiscussed = document.querySelector('#filter-discussed');
 
   // Обработчик клика на кнопки фильтров
-  const handleFilterClick = (evt) => {
+  const filterButtonClickHandler = (evt) => {
     const clickedButton = evt.target;
 
     // Убираем активный класс у всех кнопок
@@ -84,7 +86,7 @@ const initFilters = (photos) => {
 
   // Добавляем обработчики событий
   filterButtons.forEach((button) => {
-    button.addEventListener('click', handleFilterClick);
+    button.addEventListener('click', filterButtonClickHandler);
   });
 };
 
