@@ -1,3 +1,5 @@
+import { isEscapeKey } from './utils.js';
+
 let elements = null;
 
 const getBigPictureElements = () => {
@@ -158,7 +160,7 @@ const onDocumentKeyDown = (evt) => {
     return;
   }
 
-  if (evt.key === 'Escape' && !currentElements.element.classList.contains('hidden')) {
+  if (isEscapeKey(evt) && !currentElements.element.classList.contains('hidden')) {
     evt.preventDefault();
     closeFullscreen();
   }
@@ -166,13 +168,7 @@ const onDocumentKeyDown = (evt) => {
 
 document.addEventListener('keydown', onDocumentKeyDown);
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    initCancelButton();
-  });
-} else {
-  initCancelButton();
-}
+initCancelButton();
 
 export { openFullscreen };
 
