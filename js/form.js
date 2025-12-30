@@ -71,6 +71,7 @@ const EFFECT_SETTINGS = {
 
 const MAX_HASHTAGS = 5;
 const MAX_DESCRIPTION_LENGTH = 140;
+const MAX_HASHTAG_LENGTH = 20;
 const HASHTAG_PATTERN = /^#[a-zа-яё0-9]{1,19}$/i;
 
 let elements = null;
