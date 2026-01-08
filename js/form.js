@@ -1,31 +1,6 @@
 import { sendData } from './api.js';
 import { isEscapeKey } from './utils.js';
 
-const getFormElements = () => {
-  const uploadForm = document.querySelector('#upload-select-image');
-  if (!uploadForm) {
-    return null;
-  }
-
-  return {
-    form: uploadForm,
-    fileInput: uploadForm.querySelector('#upload-file'),
-    overlay: uploadForm.querySelector('.img-upload__overlay'),
-    cancelButton: uploadForm.querySelector('#upload-cancel'),
-    hashtagsInput: uploadForm.querySelector('.text__hashtags'),
-    descriptionTextarea: uploadForm.querySelector('.text__description'),
-    scaleSmaller: uploadForm.querySelector('.scale__control--smaller'),
-    scaleBigger: uploadForm.querySelector('.scale__control--bigger'),
-    scaleValue: uploadForm.querySelector('.scale__control--value'),
-    previewImage: uploadForm.querySelector('.img-upload__preview img'),
-    effectLevelSlider: uploadForm.querySelector('.effect-level__slider'),
-    effectLevelValue: uploadForm.querySelector('.effect-level__value'),
-    effectLevelContainer: uploadForm.querySelector('.img-upload__effect-level'),
-    effectRadios: uploadForm.querySelectorAll('.effects__radio'),
-    submitButton: uploadForm.querySelector('#upload-submit')
-  };
-};
-
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
@@ -73,6 +48,32 @@ const MAX_HASHTAGS = 5;
 const MAX_DESCRIPTION_LENGTH = 140;
 const MAX_HASHTAG_LENGTH = 20;
 const HASHTAG_PATTERN = /^#[a-zа-яё0-9]{1,19}$/i;
+const Z_INDEX_ERROR = '100'
+
+const getFormElements = () => {
+  const uploadForm = document.querySelector('#upload-select-image');
+  if (!uploadForm) {
+    return null;
+  }
+
+  return {
+    form: uploadForm,
+    fileInput: uploadForm.querySelector('#upload-file'),
+    overlay: uploadForm.querySelector('.img-upload__overlay'),
+    cancelButton: uploadForm.querySelector('#upload-cancel'),
+    hashtagsInput: uploadForm.querySelector('.text__hashtags'),
+    descriptionTextarea: uploadForm.querySelector('.text__description'),
+    scaleSmaller: uploadForm.querySelector('.scale__control--smaller'),
+    scaleBigger: uploadForm.querySelector('.scale__control--bigger'),
+    scaleValue: uploadForm.querySelector('.scale__control--value'),
+    previewImage: uploadForm.querySelector('.img-upload__preview img'),
+    effectLevelSlider: uploadForm.querySelector('.effect-level__slider'),
+    effectLevelValue: uploadForm.querySelector('.effect-level__value'),
+    effectLevelContainer: uploadForm.querySelector('.img-upload__effect-level'),
+    effectRadios: uploadForm.querySelectorAll('.effects__radio'),
+    submitButton: uploadForm.querySelector('#upload-submit')
+  };
+};
 
 let elements = null;
 let pristine = null;
@@ -347,6 +348,8 @@ const showSuccessMessage = () => {
 
   function onSuccessKeyDown(evt) {
     if (isEscapeKey(evt)) {
+      evt.preventDefault();
+      evt.stopPropagation();
       closeSuccess();
     }
   }
@@ -374,6 +377,7 @@ const showErrorMessage = () => {
   }
   const errorElement = errorTemplate.content.cloneNode(true);
   const errorSection = errorElement.querySelector('.error');
+  errorSection.style.zIndex = Z_INDEX_ERROR;
   document.body.appendChild(errorSection);
 
   function closeError() {
@@ -384,6 +388,8 @@ const showErrorMessage = () => {
 
   function onErrorKeyDown(evt) {
     if (isEscapeKey(evt)) {
+      evt.preventDefault();
+      evt.stopPropagation();
       closeError();
     }
   }
@@ -419,9 +425,14 @@ const blockSubmitButton = (isBlocked) => {
 const onUploadFormSubmit = async (evt) => {
   evt.preventDefault();
 
+  if (!elements || !elements.form) {
+    return;
+  }
+
   if (pristine) {
     const isValid = pristine.validate();
     if (!isValid) {
+      // Валидация не прошла - форма не отправляется
       return;
     }
   }
@@ -443,6 +454,13 @@ const onUploadFormSubmit = async (evt) => {
 
 const onFormDocumentKeyDown = (evt) => {
   if (isEscapeKey(evt) && elements && elements.overlay && !elements.overlay.classList.contains('hidden')) {
+    // Не закрываем форму, если открыто окно ошибки или успеха
+    const errorSection = document.querySelector('.error');
+    const successSection = document.querySelector('.success');
+    if (errorSection || successSection) {
+      return;
+    }
+    
     const activeElement = document.activeElement;
     if (activeElement === elements.hashtagsInput || activeElement === elements.descriptionTextarea) {
       return;
