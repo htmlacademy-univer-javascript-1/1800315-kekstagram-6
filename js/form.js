@@ -48,7 +48,7 @@ const MAX_HASHTAGS = 5;
 const MAX_DESCRIPTION_LENGTH = 140;
 const MAX_HASHTAG_LENGTH = 20;
 const HASHTAG_PATTERN = /^#[a-zа-яё0-9]{1,19}$/i;
-const Z_INDEX_ERROR = '100'
+const Z_INDEX_ERROR = '100';
 
 const getFormElements = () => {
   const uploadForm = document.querySelector('#upload-select-image');
@@ -338,6 +338,7 @@ const showSuccessMessage = () => {
   }
   const successElement = successTemplate.content.cloneNode(true);
   const successSection = successElement.querySelector('.success');
+  successSection.style.zIndex = Z_INDEX_ERROR;
   document.body.appendChild(successSection);
 
   function closeSuccess() {
@@ -460,7 +461,7 @@ const onFormDocumentKeyDown = (evt) => {
     if (errorSection || successSection) {
       return;
     }
-    
+
     const activeElement = document.activeElement;
     if (activeElement === elements.hashtagsInput || activeElement === elements.descriptionTextarea) {
       return;
