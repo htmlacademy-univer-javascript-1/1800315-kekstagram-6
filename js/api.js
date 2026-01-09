@@ -13,11 +13,16 @@ const request = async (url, options = {}) => {
 
 const getData = () => request(GET_DATA_URL);
 
-const sendData = (formData) =>
-  request(SEND_DATA_URL, {
+const sendData = async (formData) => {
+  const response = await fetch(SEND_DATA_URL, {
     method: 'POST',
     body: formData
   });
+
+  if (!response.ok) {
+    throw new Error(`Ошибка отправки данных: ${response.status}`);
+  }
+};
 
 export { getData, sendData };
 
