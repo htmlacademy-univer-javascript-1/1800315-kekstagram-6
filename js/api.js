@@ -1,5 +1,5 @@
 const GET_DATA_URL = 'https://29.javascript.htmlacademy.pro/kekstagram/data';
-const SEND_DATA_URL = 'https://29.javascript.htmlacademy.pro/kekstagramm';
+const SEND_DATA_URL = 'https://29.javascript.htmlacademy.pro/kekstagram';
 
 const request = async (url, options = {}) => {
   const response = await fetch(url, options);
